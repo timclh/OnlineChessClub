@@ -243,6 +243,7 @@ var renderMoveHistory = function (moves) {
   historyElement.scrollTop(historyElement[0].scrollHeight);
 };
 
+var state = true;
 var onDrop = function (source, target) {
   console.log(source, target);
   var move = game.move({
@@ -257,7 +258,10 @@ var onDrop = function (source, target) {
   }
 
   renderMoveHistory(game.history({ verbose: true }));
-  window.setTimeout(makeBestMove, 250);
+  // state ? => play with computer vs play with myself
+  if (state) {
+    window.setTimeout(makeBestMove, 250);
+  }
 };
 
 var onSnapEnd = function () {
@@ -310,13 +314,26 @@ var cfg = {
 
 board = ChessBoard("board", cfg);
 
+var count = 3;
 $("#setUndoBtn").on("click", () => {
-  var result = game.undo();
-  console.log(result);
-  if (result) {
-    board.position(game.fen());
-    result = game.undo();
-    board.position(game.fen());
-    renderMoveHistory(game.history({ verbose: true }));
+  count -= 1;
+  if (count >= 0) {
+    var result = game.undo();
+    console.log(result);
+    if (result) {
+      board.position(game.fen());
+      result = game.undo();
+      board.position(game.fen());
+      renderMoveHistory(game.history({ verbose: true }));
+    }
+    document.getElementById("undoLeft").innerText = count;
   }
+});
+
+document.getElementById("undoLeft").innerText = count;
+document.getElementById("switchState").innerText = state;
+
+$("#switchBtn").on("click", () => {
+  state = !state;
+  document.getElementById("switchState").innerText = state;
 });
